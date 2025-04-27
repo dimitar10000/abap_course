@@ -17,7 +17,7 @@
 
 
       METHOD if_oo_adt_classrun~main.
-       DATA(res) = zif_abap_course_basics~date_parsing( `8 December 2018` ).
+       DATA(res) = zif_abap_course_basics~scrabble_score( `AbbCD` ).
        out->write( res ).
       ENDMETHOD.
 
@@ -96,5 +96,15 @@
 
 
       METHOD zif_abap_course_basics~scrabble_score.
+       DATA(len) = numofchar( iv_word ).
+       DATA(alphabet) = `abcdefghijklmnopqrstuvwxyz`.
+
+       DO len TIMES.
+        DATA(char) = match( val = iv_word pcre = `[A-Za-z]` occ = sy-index ).
+        char = to_lower( char ).
+        DATA(val) = find( val = alphabet sub = char ).
+        rv_result = rv_result + val + 1.
+       ENDDO.
+
       ENDMETHOD.
     ENDCLASS.
