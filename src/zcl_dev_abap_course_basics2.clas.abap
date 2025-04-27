@@ -144,7 +144,9 @@
                TYPES ltty_travel_id TYPE TABLE OF lts_travel_id.
 
                LOOP AT lt_ztravel INTO DATA(row).
-                IF row-booking_fee = 20 AND row-currency_code = 'JPY'.
+                IF row-agency_id = '070001' AND
+                   row-booking_fee = 20 AND
+                   row-currency_code = 'JPY'.
                  APPEND VALUE #( travel_id = row-travel_id ) TO et_travel_ids_task7_1.
                 ENDIF.
                ENDLOOP.
@@ -186,6 +188,42 @@
 
 
           METHOD zif_abap_course_basics~open_sql.
+           SELECT * FROM ZTRAVEL_DKAL INTO TABLE @DATA(lt_ztravel).
+
+               IF lt_ztravel IS INITIAL.
+                INSERT ZTRAVEL_DKAL FROM
+                ( SELECT FROM /dmo/travel
+                  FIELDS uuid( ) AS travel_uuid,
+                     travel_id        AS travel_id,
+                     agency_id        AS agency_id,
+                     customer_id      AS customer_id,
+                     begin_date       AS begin_date,
+                     end_date         AS end_date,
+                     booking_fee      AS booking_fee,
+                     total_price      AS total_price,
+                     currency_code    AS currency_code,
+                     description      AS description,
+                     CASE status
+                      WHEN 'B' THEN  'A'  " ACCEPTED
+                      WHEN 'X'  THEN 'X' " CANCELLED
+                      ELSE 'O'         " open
+                      END AS overall_status,
+                     createdby        AS createdby,
+                     createdat        AS createdat,
+                     lastchangedby    AS last_changed_by,
+                     lastchangedat    AS last_changed_at
+                     ORDER BY travel_id ).
+                     COMMIT WORK AND WAIT.
+                     SELECT * FROM ZTRAVEL_DKAL INTO TABLE @lt_ztravel.
+               ENDIF.
+
+               TYPES: BEGIN OF lts_travel_id,
+                      travel_id TYPE /dmo/travel_id,
+                      END OF lts_travel_id.
+
+               TYPES ltty_travel_id TYPE TABLE OF lts_travel_id.
+
+
           ENDMETHOD.
 
 
