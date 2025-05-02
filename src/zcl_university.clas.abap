@@ -1,7 +1,7 @@
 CLASS zcl_university DEFINITION
   PUBLIC
   FINAL
-  CREATE PUBLIC
+  CREATE PRIVATE
   GLOBAL FRIENDS ZCL_STUDENT.
 
   PUBLIC SECTION.
@@ -20,10 +20,12 @@ CLASS zcl_university DEFINITION
                                    RETURNING VALUE(rv_university_id) TYPE i.
 
    CLASS-METHODS add_student IMPORTING iv_student_id TYPE i
-                                       iv_university_id TYPE i.
+                                       iv_university_id TYPE i
+                                       RAISING cx_sy_itab_line_not_found.
 
    CLASS-METHODS get_university IMPORTING iv_university_id TYPE i
-                                RETURNING VALUE(uni) TYPE REF TO zcl_university.
+                                RETURNING VALUE(uni) TYPE REF TO zcl_university
+                                RAISING cx_sy_itab_line_not_found.
 
    METHODS delete_student IMPORTING iv_student_id TYPE i.
 
@@ -31,8 +33,6 @@ CLASS zcl_university DEFINITION
                                  location TYPE string.
 
    METHODS list_students RETURNING VALUE(rv_students) TYPE string.
-
-    INTERFACES if_oo_adt_classrun.
   PROTECTED SECTION.
   PRIVATE SECTION.
    CLASS-DATA university_counter TYPE i VALUE 0.
@@ -55,7 +55,7 @@ CLASS zcl_university IMPLEMENTATION.
    rv_university_id = UNIVERSITY_COUNTER.
    uni = NEW #( location = iv_university_location name = iv_university_name ).
    "counter gets incremented in constructor
-   APPEND VALUE #( uni = uni id = rv_university_id ) TO uni_table.
+   INSERT VALUE #( uni = uni id = rv_university_id ) INTO TABLE uni_table.
 
   ENDMETHOD.
 
@@ -70,12 +70,16 @@ CLASS zcl_university IMPLEMENTATION.
   METHOD add_student.
    DATA(uni) = uni_table[ id = iv_university_id ]-uni.
    DATA(student_obj) = zcl_student=>get_student( EXPORTING iv_student_id = iv_student_id ).
-   APPEND VALUE #( id = iv_student_id student = student_obj ) TO uni->students.
+
+   INSERT VALUE #( id = iv_student_id student = student_obj ) INTO TABLE uni->students.
+   IF sy-subrc <> 4. "duplicate values check
+    EXIT.
+   ENDIF.
    student_obj->set_university_id( iv_university_id ).
   ENDMETHOD.
 
   METHOD delete_student.
-   DELETE TABLE students WITH TABLE KEY id = iv_student_id.
+   DELETE students WHERE id = iv_student_id.
   ENDMETHOD.
 
   METHOD get_university.

@@ -1,7 +1,8 @@
 CLASS zcl_student DEFINITION
 PUBLIC
   FINAL
-  CREATE PUBLIC.
+  CREATE PRIVATE
+  GLOBAL FRIENDS ZCL_UNIVERSITY.
 
  PUBLIC SECTION.
   TYPES: BEGIN OF student_row,
@@ -9,23 +10,22 @@ PUBLIC
            student TYPE REF TO ZCL_STUDENT,
           END OF student_row.
 
-  CLASS-METHODS create_student
-   IMPORTING iv_student_name TYPE string
-             iv_student_age TYPE i
-             iv_major TYPE string
-             iv_email TYPE string
-   RETURNING VALUE(rv_student_id) TYPE i.
+  CLASS-METHODS create_student IMPORTING iv_student_name TYPE string
+                                         iv_student_age TYPE i
+                                         iv_major TYPE string
+                                         iv_email TYPE string
+                               RETURNING VALUE(rv_student_id) TYPE i.
 
   CLASS-METHODS get_student importing iv_student_id TYPE i
-                            returning value(rs_student) TYPE REF TO ZCL_STUDENT.
+                            returning value(rs_student) TYPE REF TO ZCL_STUDENT
+                            RAISING cx_sy_itab_line_not_found.
 
   CLASS-METHODS update_student importing iv_student_id TYPE i
                                          iv_name TYPE string OPTIONAL
                                          iv_age TYPE i OPTIONAL
                                          iv_major TYPE string OPTIONAL
-                                         iv_email TYPE string OPTIONAL.
-
-  METHODS set_university_id IMPORTING iv_university_id TYPE i.
+                                         iv_email TYPE string OPTIONAL
+                               RAISING cx_sy_itab_line_not_found.
 
   METHODS get_id RETURNING VALUE(rv_id) TYPE i.
 
@@ -53,6 +53,8 @@ PUBLIC
   DATA major TYPE string.
   DATA email TYPE string.
 
+  METHODS set_university_id IMPORTING iv_university_id TYPE i.
+
 ENDCLASS.
 
 CLASS zcl_student IMPLEMENTATION.
@@ -64,11 +66,10 @@ CLASS zcl_student IMPLEMENTATION.
                      age = iv_student_age
                      major = iv_major
                      email = iv_email ).
-    APPEND VALUE #( id = rv_student_id student = student ) to students.
+    INSERT VALUE #( id = rv_student_id student = student ) INTO TABLE students.
   ENDMETHOD.
 
   METHOD get_student.
-    "add check for valid ID!
     DATA(record) = students[ id = iv_student_id ].
     rs_student = record-student.
   ENDMETHOD.
