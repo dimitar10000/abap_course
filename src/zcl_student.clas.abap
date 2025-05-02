@@ -20,10 +20,10 @@ PUBLIC
                             returning value(rs_student) TYPE REF TO ZCL_STUDENT.
 
   CLASS-METHODS update_student importing iv_student_id TYPE i
-                                         iv_name TYPE string
-                                         iv_age TYPE i
-                                         iv_major TYPE string
-                                         iv_email TYPE string.
+                                         iv_name TYPE string OPTIONAL
+                                         iv_age TYPE i OPTIONAL
+                                         iv_major TYPE string OPTIONAL
+                                         iv_email TYPE string OPTIONAL.
 
   METHODS set_university_id IMPORTING iv_university_id TYPE i.
 
@@ -44,7 +44,7 @@ PUBLIC
 
  PROTECTED SECTION.
  PRIVATE SECTION.
-  CLASS-DATA students TYPE TABLE OF student_row.
+  CLASS-DATA students TYPE SORTED TABLE OF student_row WITH UNIQUE KEY id.
   CLASS-DATA students_counter TYPE i VALUE 0.
   DATA student_id TYPE i.
   DATA university_id TYPE i.
@@ -64,7 +64,7 @@ CLASS zcl_student IMPLEMENTATION.
                      age = iv_student_age
                      major = iv_major
                      email = iv_email ).
-    APPEND VALUE #( id = students_counter student = student ) to students.
+    APPEND VALUE #( id = rv_student_id student = student ) to students.
   ENDMETHOD.
 
   METHOD get_student.
@@ -86,11 +86,21 @@ CLASS zcl_student IMPLEMENTATION.
   METHOD update_student.
    DATA row LIKE LINE OF students.
    row = students[ id = iv_student_id ].
-   row-student->name = iv_name.
-   row-student->age = iv_age.
-   row-student->major = iv_major.
-   row-student->email = iv_email.
-   MODIFY students FROM row.
+
+   IF iv_name IS SUPPLIED.
+    row-student->name = iv_name.
+   ENDIF.
+   IF iv_age IS SUPPLIED.
+    row-student->age = iv_age.
+   ENDIF.
+   IF iv_major IS SUPPLIED.
+    row-student->major = iv_major.
+   ENDIF.
+   IF iv_email IS SUPPLIED.
+    row-student->email = iv_email.
+   ENDIF.
+
+   MODIFY TABLE students FROM row.
 
    DATA(student) = row-student.
    zcl_university=>update_student( EXPORTING iv_university_id = student->university_id

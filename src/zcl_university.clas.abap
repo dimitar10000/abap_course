@@ -1,7 +1,7 @@
 CLASS zcl_university DEFINITION
   PUBLIC
   FINAL
-  CREATE PRIVATE
+  CREATE PUBLIC
   GLOBAL FRIENDS ZCL_STUDENT.
 
   PUBLIC SECTION.
@@ -36,8 +36,8 @@ CLASS zcl_university DEFINITION
   PROTECTED SECTION.
   PRIVATE SECTION.
    CLASS-DATA university_counter TYPE i VALUE 0.
-   CLASS-DATA uni_table TYPE TABLE OF uni_row.
-   DATA students TYPE TABLE OF student_row WITH KEY id.
+   CLASS-DATA uni_table TYPE SORTED TABLE OF uni_row WITH UNIQUE KEY id.
+   DATA students TYPE SORTED TABLE OF student_row WITH UNIQUE KEY id.
    DATA id TYPE i.
    DATA name TYPE string.
    DATA location TYPE string.
@@ -50,17 +50,13 @@ ENDCLASS.
 
 CLASS zcl_university IMPLEMENTATION.
 
-
-  METHOD if_oo_adt_classrun~main.
-  ENDMETHOD.
-
   METHOD create_university.
    DATA uni TYPE REF TO ZCL_UNIVERSITY.
    rv_university_id = UNIVERSITY_COUNTER.
-   uni = NEW #( name = iv_university_name location = iv_university_location ).
+   uni = NEW #( location = iv_university_location name = iv_university_name ).
    "counter gets incremented in constructor
-
    APPEND VALUE #( uni = uni id = rv_university_id ) TO uni_table.
+
   ENDMETHOD.
 
   METHOD constructor.
@@ -105,7 +101,7 @@ CLASS zcl_university IMPLEMENTATION.
    DATA(uni) = uni_table[ id = iv_university_id ]-uni.
    DATA(row) = uni->students[ id = iv_student_id ].
    row-student = iv_student.
-   MODIFY uni->students FROM row.
+   MODIFY TABLE uni->students FROM row.
 
   ENDMETHOD.
 
