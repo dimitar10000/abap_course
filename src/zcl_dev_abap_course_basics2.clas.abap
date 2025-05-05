@@ -21,22 +21,27 @@
 
 
               METHOD if_oo_adt_classrun~main.
-                TYPES: BEGIN OF lts_travel_id,
-                       travel_id TYPE /dmo/travel_id,
-                       END OF lts_travel_id.
+                 DATA(res) = zif_abap_course_basics~fizz_buzz(  ).
+                 DATA strings TYPE TABLE OF string.
+                 SPLIT res AT CL_ABAP_CHAR_UTILITIES=>NEWLINE INTO TABLE strings.
+                 out->write( strings[ 1 ] ).
 
-                TYPES ltty_travel_id TYPE TABLE OF lts_travel_id.
-
-                DATA table1 TYPE ltty_travel_id.
-                DATA table2 TYPE ltty_travel_id.
-                DATA table3 TYPE ltty_travel_id.
-
-                zif_abap_course_basics~internal_tables( IMPORTING et_travel_ids_task7_1 = table1
-                    et_travel_ids_task7_2 = table2  et_travel_ids_task7_3 = table3 ).
-
-                "out->write( table1 ).
-                "out->write( table2 ).
-                out->write( table3 ).
+*                TYPES: BEGIN OF lts_travel_id,
+*                       travel_id TYPE /dmo/travel_id,
+*                       END OF lts_travel_id.
+*
+*                TYPES ltty_travel_id TYPE TABLE OF lts_travel_id.
+*
+*                DATA table1 TYPE ltty_travel_id.
+*                DATA table2 TYPE ltty_travel_id.
+*                DATA table3 TYPE ltty_travel_id.
+*
+*                zif_abap_course_basics~internal_tables( IMPORTING et_travel_ids_task7_1 = table1
+*                    et_travel_ids_task7_2 = table2  et_travel_ids_task7_3 = table3 ).
+*
+*                out->write( table1 ).
+*                out->write( table2 ).
+*                out->write( table3 ).
               ENDMETHOD.
 
 
@@ -75,7 +80,7 @@
                 day = |0{ day }|.
                ENDIF.
 
-               rv_result = |{ year }{ month }{ day }|.
+               rv_result = year && month && day.
               ENDMETHOD.
 
 
