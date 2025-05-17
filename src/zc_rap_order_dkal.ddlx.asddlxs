@@ -1,0 +1,96 @@
+@Metadata.layer: #CORE
+@UI: {
+ headerInfo: { typeName: 'Order',
+               typeNamePlural: 'Orders',
+               title: { type: #STANDARD, label: 'Order', value: 'OrderId' } },
+               presentationVariant: [{ sortOrder: [{ by: 'CreationDate', direction: #ASC }] }] 
+}
+annotate view ZC_RAP_Order_Dkal
+    with 
+{   
+
+    @UI.facet: [ { targetQualifier: 'OrderHeader',
+                   purpose: #HEADER,
+                   type: #FIELDGROUP_REFERENCE,
+                   label: 'Order header'},
+                  { targetQualifier: 'OrderDetails',
+                   purpose: #STANDARD,
+                   type: #FIELDGROUP_REFERENCE,
+                   label: 'Order details' },
+                   { id: 'Items',
+                   purpose: #STANDARD,
+                   type: #LINEITEM_REFERENCE,
+                   label: 'Items',
+                   targetElement: '_Item'  } ]
+
+    @UI.hidden: true
+    OrderUuid;
+    @UI: { lineItem: [ { position: 10 } ],
+           identification: [ { position:  10 } ],
+           selectionField: [ { position: 10 } ] }
+    @UI.fieldGroup: [{
+    type: #STANDARD,
+    position: 1,
+    qualifier: 'OrderHeader'}]
+    OrderId;
+    @UI: { lineItem: [ { position: 20 } ],
+           identification: [ { position:  20 } ] }
+    @UI.fieldGroup: [{
+    type: #STANDARD,
+    position: 2,
+    qualifier: 'OrderHeader'},
+    {type: #STANDARD,
+    position: 1,
+    qualifier: 'OrderDetails'}]
+    Name;
+    @UI: { lineItem: [ { position: 30 } ],
+           identification: [ { position:  30 } ],
+           selectionField: [ { position: 30 } ] }
+    @Consumption.valueHelpDefinition: [{ entity : {name: 'ZI_READ_STATUS_DOMAIN', element: 'Text'  } }]
+    @UI.fieldGroup: [{
+    type: #STANDARD,
+    position: 2,
+    qualifier: 'OrderDetails'}]
+    Status;
+    @UI: { lineItem: [ { position: 40 } ],
+           identification: [ { position:  40 } ],
+           selectionField: [ { position: 40 } ] }
+    @Consumption.valueHelpDefinition: [{ entity: { name: '/DMO/I_Customer', element: 'CustomerID'} }]
+    @UI.fieldGroup: [{
+    type: #STANDARD,
+    position: 3,
+    qualifier: 'OrderDetails'}]
+    Customer;
+    @UI: { lineItem: [ { position: 50 } ],
+           identification: [ { position:  50 } ],
+           selectionField: [ { position: 50 } ] }
+    @Consumption.filter.selectionType: #INTERVAL
+    @UI.fieldGroup: [{
+    type: #STANDARD,
+    position: 4,
+    qualifier: 'OrderDetails'}]
+    CreationDate;
+    @UI: { lineItem: [ { position: 60 } ],
+           identification: [ { position:  50 } ]}
+    Complexity;
+    
+    @UI.fieldGroup: [{
+    type: #STANDARD,
+    position: 5,
+    qualifier: 'OrderDetails'}]
+    CancellationDate;
+    @UI.fieldGroup: [{
+    type: #STANDARD,
+    position: 6,
+    qualifier: 'OrderDetails'}]
+    CompletionDate;
+    @UI.fieldGroup: [{
+    type: #STANDARD,
+    position: 7,
+    qualifier: 'OrderDetails'}]
+    DeliveryCountry;
+    @UI.hidden: true
+    TotalPrice;
+    @UI.hidden: true
+    Currency;
+}
