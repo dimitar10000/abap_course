@@ -26,6 +26,8 @@ on $projection.DeliveryCountry = _Country.Country
     delivery_country as DeliveryCountry,
     total_price as TotalPrice,
     currency as Currency,
+    last_changed as LastChanged,
+    
     
     _Customer,
     _Country,

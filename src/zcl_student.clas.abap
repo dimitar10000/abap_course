@@ -57,7 +57,21 @@ PUBLIC
 
 ENDCLASS.
 
-CLASS zcl_student IMPLEMENTATION.
+
+
+CLASS ZCL_STUDENT IMPLEMENTATION.
+
+
+  METHOD constructor.
+   me->student_id = students_counter.
+   students_counter = students_counter + 1.
+
+   me->name = name.
+   me->age = age.
+   me->major = major.
+   me->email = email.
+  ENDMETHOD.
+
 
   METHOD create_student.
    DATA student TYPE REF TO ZCL_STUDENT.
@@ -69,20 +83,42 @@ CLASS zcl_student IMPLEMENTATION.
     INSERT VALUE #( id = rv_student_id student = student ) INTO TABLE students.
   ENDMETHOD.
 
+
+  METHOD get_age.
+   rv_age = me->age.
+  ENDMETHOD.
+
+
+  METHOD get_email.
+   rv_email = me->email.
+  ENDMETHOD.
+
+
+  METHOD get_id.
+   rv_id = me->student_id.
+  ENDMETHOD.
+
+
+  METHOD get_major.
+   rv_major = me->major.
+  ENDMETHOD.
+
+
+  METHOD get_name.
+   rv_name = me->name.
+  ENDMETHOD.
+
+
   METHOD get_student.
     DATA(record) = students[ id = iv_student_id ].
     rs_student = record-student.
   ENDMETHOD.
 
-  METHOD constructor.
-   me->student_id = students_counter.
-   students_counter = students_counter + 1.
 
-   me->name = name.
-   me->age = age.
-   me->major = major.
-   me->email = email.
+  METHOD set_university_id.
+    me->university_id = iv_university_id.
   ENDMETHOD.
+
 
   METHOD update_student.
    DATA row LIKE LINE OF students.
@@ -108,29 +144,4 @@ CLASS zcl_student IMPLEMENTATION.
                                   iv_student_id = student->student_id
                                   iv_student = row-student ).
   ENDMETHOD.
-
-  METHOD get_id.
-   rv_id = me->student_id.
-  ENDMETHOD.
-
-  METHOD get_age.
-   rv_age = me->age.
-  ENDMETHOD.
-
-  METHOD get_email.
-   rv_email = me->email.
-  ENDMETHOD.
-
-  METHOD get_major.
-   rv_major = me->major.
-  ENDMETHOD.
-
-  METHOD get_name.
-   rv_name = me->name.
-  ENDMETHOD.
-
-  METHOD set_university_id.
-    me->university_id = iv_university_id.
-  ENDMETHOD.
-
 ENDCLASS.

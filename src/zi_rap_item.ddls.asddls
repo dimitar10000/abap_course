@@ -18,6 +18,7 @@ on $projection.OrderUuid = _Order.OrderUuid
     price as Price,
     currency as Currency,
     quantity as Quantity,
+    last_changed as LastChanged,
     
     _Order
 }

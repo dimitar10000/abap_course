@@ -1,0 +1,81 @@
+managed;
+strict ( 2 );
+
+define behavior for ZI_RAP_Order alias Order
+implementation in class zbp_i_rap_order unique
+persistent table zorder_dkal
+lock master
+authorization master ( instance )
+etag master LastChanged
+{
+  create;
+  update;
+  delete;
+  field ( numbering : managed, readonly ) OrderUuid;
+  field ( readonly ) OrderId, Status, CreationDate, CompletionDate, CancellationDate;
+  field ( readonly ) LastChanged;
+  field ( mandatory ) Name, Customer;
+  association _Item { create; }
+
+  action ( features : instance ) completeOrder result [1] $self;
+  action ( features : instance ) cancelOrder result [1] $self;
+  internal action recalcTotalPrice;
+
+  determination incrementId on save { create; }
+  determination setDate on save { create; }
+  determination setInitialStatus on save { create; }
+  determination calculatePrice on modify { field Currency; }
+
+  validation validateOrderItems on save { create; }
+  validation validateName on save { field Name; create; }
+  validation validateCustomer on save { field Customer; create; }
+
+  mapping for ZORDER_DKAL
+  {
+  OrderUuid = order_uuid;
+  OrderId = order_id;
+  Name = name;
+  Status = status;
+  Customer = customer;
+  CreationDate = creation_date;
+  CancellationDate = cancellation_date;
+  CompletionDate = completion_date;
+  DeliveryCountry = delivery_country;
+  TotalPrice = total_price;
+  Currency = currency;
+  LastChanged = last_changed;
+  }
+}
+
+define behavior for ZI_RAP_Item alias Item
+implementation in class zbp_i_rap_item unique
+persistent table zitem_dkal
+lock dependent by _Order
+authorization dependent by _Order
+etag master LastChanged
+{
+  update;
+  delete;
+  field ( numbering : managed, readonly ) ItemUuid;
+  field ( readonly ) OrderUuid, Currency;
+  field ( readonly ) LastChanged;
+  field ( mandatory ) Name, Price;
+  association _Order;
+
+  determination setCurrency on save { create; }
+  determination calcTotalPrice on modify { field Price; }
+
+  validation validateName on save { field Name; create; }
+  validation validatePrice on save { field Price; create; }
+
+  mapping for ZITEM_DKAL
+  {
+  ItemUuid = item_uuid;
+  OrderUuid = order_uuid;
+  Name = name;
+  Price = price;
+  Currency = currency;
+  Quantity = quantity;
+  LastChanged = last_changed;
+  }
+}

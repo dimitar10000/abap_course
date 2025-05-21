@@ -12,6 +12,7 @@ define view entity ZC_RAP_Item_Dkal as projection on ZI_RAP_Item
     Price,
     Currency,
     Quantity,
+    LastChanged,
     /* Associations */
     _Order: redirected to parent ZC_RAP_Order_Dkal
 }

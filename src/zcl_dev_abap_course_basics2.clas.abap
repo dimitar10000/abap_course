@@ -13,11 +13,29 @@
                 INTERFACES zif_abap_course_basics .
               PROTECTED SECTION.
               PRIVATE SECTION.
-            ENDCLASS.
+ENDCLASS.
 
 
 
-            CLASS zcl_dev_abap_course_basics2 IMPLEMENTATION.
+CLASS ZCL_DEV_ABAP_COURSE_BASICS2 IMPLEMENTATION.
+
+
+              METHOD convert_currency_to_usd.
+               CASE currency_code.
+                WHEN 'AMD'. new_amount = floor( amount * '0.0026' ).
+                WHEN 'AUD'. new_amount = floor( amount * '0.64' ).
+                WHEN 'SGD'. new_amount = floor( amount * '0.76' ).
+                WHEN 'CNY'. new_amount = floor( amount * '0.14' ).
+                WHEN 'AED'. new_amount = floor( amount * '0.27' ).
+                WHEN 'JPY'. new_amount = floor( amount * '0.0069' ).
+                WHEN 'AFN'. new_amount = floor( amount * '0.014' ).
+                WHEN 'ALL'. new_amount = floor( amount * '0.012' ).
+                WHEN 'EUR'. new_amount = floor( amount * '1.14' ).
+                WHEN 'INR'. new_amount = floor( amount * '0.012' ).
+                WHEN 'USD'. new_amount = amount.
+                WHEN OTHERS. new_amount = 0.
+               ENDCASE.
+              ENDMETHOD.
 
 
               METHOD if_oo_adt_classrun~main.
@@ -268,22 +286,4 @@
                ENDDO.
 
               ENDMETHOD.
-
-              METHOD convert_currency_to_usd.
-               CASE currency_code.
-                WHEN 'AMD'. new_amount = floor( amount * '0.0026' ).
-                WHEN 'AUD'. new_amount = floor( amount * '0.64' ).
-                WHEN 'SGD'. new_amount = floor( amount * '0.76' ).
-                WHEN 'CNY'. new_amount = floor( amount * '0.14' ).
-                WHEN 'AED'. new_amount = floor( amount * '0.27' ).
-                WHEN 'JPY'. new_amount = floor( amount * '0.0069' ).
-                WHEN 'AFN'. new_amount = floor( amount * '0.014' ).
-                WHEN 'ALL'. new_amount = floor( amount * '0.012' ).
-                WHEN 'EUR'. new_amount = floor( amount * '1.14' ).
-                WHEN 'INR'. new_amount = floor( amount * '0.012' ).
-                WHEN 'USD'. new_amount = amount.
-                WHEN OTHERS. new_amount = 0.
-               ENDCASE.
-              ENDMETHOD.
-
-    ENDCLASS.
+ENDCLASS.

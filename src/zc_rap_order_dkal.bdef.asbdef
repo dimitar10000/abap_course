@@ -1,0 +1,24 @@
+projection;
+strict ( 2 );
+
+define behavior for ZC_RAP_Order_Dkal alias Order
+use etag
+{
+  use create;
+  use update;
+  use delete;
+
+  use association _Item { create; }
+
+  use action completeOrder;
+  use action cancelOrder;
+}
+
+define behavior for ZC_RAP_Item_Dkal alias Item
+use etag
+{
+  use update;
+  use delete;
+
+  use association _Order;
+}

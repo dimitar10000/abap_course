@@ -1,0 +1,7 @@
+@EndUserText.label: 'Service definition for orders'
+define service ZUI_RAP_Order_Dkal {
+  expose ZC_RAP_Order_Dkal as Orders;
+  expose ZC_RAP_Item_Dkal  as Items;
+  expose /DMO/I_Customer   as Customer;
+  expose I_Country         as Country;
+}
