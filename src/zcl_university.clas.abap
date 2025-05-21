@@ -48,24 +48,10 @@ CLASS zcl_university DEFINITION
 
 ENDCLASS.
 
-CLASS zcl_university IMPLEMENTATION.
 
-  METHOD create_university.
-   DATA uni TYPE REF TO ZCL_UNIVERSITY.
-   rv_university_id = UNIVERSITY_COUNTER.
-   uni = NEW #( location = iv_university_location name = iv_university_name ).
-   "counter gets incremented in constructor
-   INSERT VALUE #( uni = uni id = rv_university_id ) INTO TABLE uni_table.
 
-  ENDMETHOD.
+CLASS ZCL_UNIVERSITY IMPLEMENTATION.
 
-  METHOD constructor.
-   me->id = university_counter.
-   university_counter = university_counter + 1.
-
-   me->name = name.
-   me->location = location.
-  ENDMETHOD.
 
   METHOD add_student.
    DATA(uni) = uni_table[ id = iv_university_id ]-uni.
@@ -78,13 +64,35 @@ CLASS zcl_university IMPLEMENTATION.
    student_obj->set_university_id( iv_university_id ).
   ENDMETHOD.
 
+
+  METHOD constructor.
+   me->id = university_counter.
+   university_counter = university_counter + 1.
+
+   me->name = name.
+   me->location = location.
+  ENDMETHOD.
+
+
+  METHOD create_university.
+   DATA uni TYPE REF TO ZCL_UNIVERSITY.
+   rv_university_id = UNIVERSITY_COUNTER.
+   uni = NEW #( location = iv_university_location name = iv_university_name ).
+   "counter gets incremented in constructor
+   INSERT VALUE #( uni = uni id = rv_university_id ) INTO TABLE uni_table.
+
+  ENDMETHOD.
+
+
   METHOD delete_student.
    DELETE students WHERE id = iv_student_id.
   ENDMETHOD.
 
+
   METHOD get_university.
    uni = uni_table[ id = iv_university_id ]-uni.
   ENDMETHOD.
+
 
   METHOD list_students.
    LOOP AT students INTO DATA(row).
@@ -101,6 +109,7 @@ CLASS zcl_university IMPLEMENTATION.
 
   ENDMETHOD.
 
+
   METHOD update_student.
    DATA(uni) = uni_table[ id = iv_university_id ]-uni.
    DATA(row) = uni->students[ id = iv_student_id ].
@@ -108,5 +117,4 @@ CLASS zcl_university IMPLEMENTATION.
    MODIFY TABLE uni->students FROM row.
 
   ENDMETHOD.
-
 ENDCLASS.
