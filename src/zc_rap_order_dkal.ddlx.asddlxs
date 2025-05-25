@@ -75,8 +75,20 @@ annotate view ZC_RAP_Order_Dkal
     qualifier: 'OrderDetails'}]
     CreationDate;
     @UI: { lineItem: [ { position: 60 } ],
-           identification: [ { position:  50 } ]}
+           identification: [ { position:  60 } ]}
     Complexity;
+    
+    @UI: { lineItem: [ { position: 70 } ],
+           identification: [ { position:  70 } ] }
+    TotalPrice;
+    @UI: { lineItem: [ { position: 80 } ],
+           identification: [ { position:  80 } ] }
+    @Consumption.valueHelpDefinition: [{ entity: { name: 'I_Currency', element: 'CurrencyISOCode'} }]
+    @UI.fieldGroup: [{
+    type: #STANDARD,
+    position: 8,
+    qualifier: 'OrderDetails'}]
+    Currency;
     
     @UI.fieldGroup: [{
     type: #STANDARD,
@@ -93,8 +105,5 @@ annotate view ZC_RAP_Order_Dkal
     position: 7,
     qualifier: 'OrderDetails'}]
     DeliveryCountry;
-    @UI.hidden: true
-    TotalPrice;
-    @UI.hidden: true
-    Currency;
+    
 }

@@ -21,7 +21,6 @@ define root view entity ZC_RAP_Order_Dkal as projection on ZI_RAP_Order
     @ObjectModel.virtualElementCalculatedBy: 'ABAP:ZCL_CALCULATION_COMPLEXITY'
     virtual Complexity: abap.string( 256 ),
     LastChanged,
-    
     /* Associations */
     _Country,
     _Customer,

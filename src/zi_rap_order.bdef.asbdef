@@ -9,7 +9,7 @@ authorization master ( instance )
 etag master LastChanged
 {
   create;
-  update;
+  update ( features : instance );
   delete;
   field ( numbering : managed, readonly ) OrderUuid;
   field ( readonly ) OrderId, Status, CreationDate, CompletionDate, CancellationDate;
@@ -54,8 +54,8 @@ lock dependent by _Order
 authorization dependent by _Order
 etag master LastChanged
 {
-  update;
-  delete;
+  update ( features : instance);
+  delete ( features : instance);
   field ( numbering : managed, readonly ) ItemUuid;
   field ( readonly ) OrderUuid, Currency;
   field ( readonly ) LastChanged;
@@ -63,7 +63,8 @@ etag master LastChanged
   association _Order;
 
   determination setCurrency on save { create; }
-  determination calcTotalPrice on modify { field Price; }
+  determination setQuantity on save { create; }
+  determination calcTotalPrice on modify { field Price; field Quantity; }
 
   validation validateName on save { field Name; create; }
   validation validatePrice on save { field Price; create; }

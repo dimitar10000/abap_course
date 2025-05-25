@@ -60,6 +60,16 @@ CLASS zcm_rap_dkal DEFINITION
             attr4 TYPE scx_attrname VALUE '',
         END OF not_enough_items.
 
+    CONSTANTS:
+        BEGIN OF generic_error,
+            msgid TYPE symsgid VALUE 'ZRAP_MSG_DKAL',
+            msgno TYPE symsgno VALUE '006',
+            attr1 TYPE scx_attrname VALUE 'GENERIC',
+            attr2 TYPE scx_attrname VALUE '',
+            attr3 TYPE scx_attrname VALUE '',
+            attr4 TYPE scx_attrname VALUE '',
+        END OF generic_error.
+
     METHODS constructor
       IMPORTING
         severity TYPE IF_ABAP_BEHV_MESSAGE=>t_severity DEFAULT IF_ABAP_BEHV_MESSAGE=>severity-error

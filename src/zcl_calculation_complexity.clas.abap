@@ -52,5 +52,13 @@ CLASS ZCL_CALCULATION_COMPLEXITY IMPLEMENTATION.
 
 
   METHOD if_sadl_exit_calc_element_read~get_calculation_info.
+    LOOP AT it_requested_calc_elements ASSIGNING FIELD-SYMBOL(<fs_calc_element>).
+     CASE <fs_calc_element>.
+      WHEN 'COMPLEXITY'.
+       INSERT `ORDERUUID` INTO TABLE et_requested_orig_elements.
+     ENDCASE.
+    ENDLOOP.
+
+
   ENDMETHOD.
 ENDCLASS.

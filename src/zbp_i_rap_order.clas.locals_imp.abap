@@ -29,6 +29,9 @@ CLASS lhc_Order DEFINITION INHERITING FROM cl_abap_behavior_handler.
     METHODS get_instance_features FOR INSTANCE FEATURES
       IMPORTING keys REQUEST requested_features FOR Order RESULT result.
 
+    METHODS get_global_features FOR GLOBAL FEATURES
+     IMPORTING REQUEST requested_features FOR Order RESULT result.
+
     METHODS cancelOrder FOR MODIFY
       IMPORTING keys FOR ACTION Order~cancelOrder RESULT result.
 
@@ -40,6 +43,7 @@ CLASS lhc_Order DEFINITION INHERITING FROM cl_abap_behavior_handler.
 
     METHODS setInitialStatus FOR DETERMINE ON SAVE
       IMPORTING keys FOR Order~setInitialStatus.
+
     METHODS calculatePrice FOR DETERMINE ON MODIFY
       IMPORTING keys FOR Order~calculatePrice.
 
@@ -48,6 +52,7 @@ ENDCLASS.
 CLASS lhc_Order IMPLEMENTATION.
 
   METHOD get_instance_authorizations.
+
   ENDMETHOD.
 
   METHOD incrementId.
@@ -78,6 +83,24 @@ CLASS lhc_Order IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD setDate.
+   READ ENTITIES OF ZI_RAP_ORDER IN LOCAL MODE
+    ENTITY Order
+     FIELDS ( CreationDate ) WITH CORRESPONDING #( keys )
+    RESULT DATA(orders).
+
+   DELETE orders WHERE CreationDate IS NOT INITIAL.
+   CHECK orders IS NOT INITIAL.
+
+   MODIFY ENTITIES OF ZI_RAP_ORDER IN LOCAL MODE
+    ENTITY Order
+     UPDATE
+      FIELDS ( CreationDate )
+      WITH VALUE #( FOR order IN orders
+                    ( %tky = order-%tky
+                      CreationDate = sy-datum ) )
+      REPORTED DATA(update_reported).
+
+    reported = CORRESPONDING #( DEEP update_reported ).
   ENDMETHOD.
 
   METHOD validateCustomer.
@@ -190,18 +213,40 @@ CLASS lhc_Order IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD get_instance_features.
+  METHOD get_global_features.
+   result-%create = COND #( WHEN sy-subrc = 0
+                             THEN if_abap_behv=>auth-allowed
+                             ELSE if_abap_behv=>auth-unauthorized ).
+  ENDMETHOD.
 
+  METHOD get_instance_features.
+   READ ENTITIES OF ZI_RAP_ORDER IN LOCAL MODE
+    ENTITY Order
+     FIELDS ( Status )
+     WITH CORRESPONDING #( keys )
+    RESULT DATA(orders)
+    FAILED failed.
+
+   result = VALUE #( FOR order in orders
+                      LET completed_or_cancelled = COND #( WHEN order-Status = ORDER_STATUS-completed
+                                                                OR order-Status = ORDER_STATUS-cancelled
+                                                 THEN if_abap_behv=>fc-o-disabled
+                                                 ELSE if_abap_behv=>fc-o-enabled )
+                      IN ( %tky = order-%tky
+                           %action-completeOrder = completed_or_cancelled
+                           %action-cancelOrder = completed_or_cancelled
+                           %update = completed_or_cancelled ) ).
   ENDMETHOD.
 
   METHOD cancelOrder.
    MODIFY ENTITIES OF ZI_RAP_ORDER IN LOCAL MODE
     ENTITY Order
      UPDATE
-      FIELDS ( Status )
+      FIELDS ( Status CancellationDate )
        WITH VALUE #( FOR key in keys
                       ( %tky = key-%tky
-                        Status = order_status-cancelled ) )
+                        Status = order_status-cancelled
+                        CancellationDate = sy-datum ) )
    FAILED failed
    REPORTED reported.
 
@@ -220,10 +265,11 @@ CLASS lhc_Order IMPLEMENTATION.
    MODIFY ENTITIES OF ZI_RAP_ORDER IN LOCAL MODE
     ENTITY Order
      UPDATE
-      FIELDS ( Status )
+      FIELDS ( Status CompletionDate )
        WITH VALUE #( FOR key in keys
                       ( %tky = key-%tky
-                        Status = order_status-completed ) )
+                        Status = order_status-completed
+                        CompletionDate = sy-datum ) )
    FAILED failed
    REPORTED reported.
 
