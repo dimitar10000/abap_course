@@ -29,9 +29,6 @@ CLASS lhc_Order DEFINITION INHERITING FROM cl_abap_behavior_handler.
     METHODS get_instance_features FOR INSTANCE FEATURES
       IMPORTING keys REQUEST requested_features FOR Order RESULT result.
 
-    METHODS get_global_features FOR GLOBAL FEATURES
-     IMPORTING REQUEST requested_features FOR Order RESULT result.
-
     METHODS cancelOrder FOR MODIFY
       IMPORTING keys FOR ACTION Order~cancelOrder RESULT result.
 
@@ -44,8 +41,11 @@ CLASS lhc_Order DEFINITION INHERITING FROM cl_abap_behavior_handler.
     METHODS setInitialStatus FOR DETERMINE ON SAVE
       IMPORTING keys FOR Order~setInitialStatus.
 
-    METHODS calculatePrice FOR DETERMINE ON MODIFY
-      IMPORTING keys FOR Order~calculatePrice.
+*    METHODS calculatePrice FOR DETERMINE ON MODIFY
+*      IMPORTING keys FOR Order~calculatePrice.
+
+    METHODS updateCurrency FOR DETERMINE ON MODIFY
+      IMPORTING keys FOR Order~updateCurrency.
 
 ENDCLASS.
 
@@ -213,12 +213,6 @@ CLASS lhc_Order IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD get_global_features.
-   result-%create = COND #( WHEN sy-subrc = 0
-                             THEN if_abap_behv=>auth-allowed
-                             ELSE if_abap_behv=>auth-unauthorized ).
-  ENDMETHOD.
-
   METHOD get_instance_features.
    READ ENTITIES OF ZI_RAP_ORDER IN LOCAL MODE
     ENTITY Order
@@ -284,6 +278,7 @@ CLASS lhc_Order IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD recalcTotalPrice.
+   DATA update TYPE TABLE FOR UPDATE ZI_RAP_ORDER.
    TYPES:
        BEGIN OF amount_per_currency,
         amount TYPE z_order_total_price_dkal,
@@ -294,7 +289,7 @@ CLASS lhc_Order IMPLEMENTATION.
 
    READ ENTITIES OF ZI_RAP_ORDER IN LOCAL MODE
     ENTITY Order
-     FIELDS ( Currency ) WITH CORRESPONDING #( keys )
+     FIELDS ( Currency TotalPrice ) WITH CORRESPONDING #( keys )
     RESULT DATA(orders).
 
    DELETE orders WHERE CURRENCY IS INITIAL.
@@ -304,12 +299,12 @@ CLASS lhc_Order IMPLEMENTATION.
 
     READ ENTITIES OF ZI_RAP_ORDER IN LOCAL MODE
      ENTITY Order BY \_Item
-      FIELDS ( Price Currency )
+      FIELDS ( Price Currency Quantity )
      WITH VALUE #( ( %tky = order-%tky ) )
      RESULT DATA(items).
 
      LOOP AT items INTO DATA(item) WHERE CURRENCY IS NOT INITIAL.
-      COLLECT VALUE amount_per_currency( amount = item-Price currency = item-Currency )
+      COLLECT VALUE amount_per_currency( amount = item-Price * item-Quantity currency = item-Currency )
        INTO amounts_currencies.
      ENDLOOP.
 
@@ -317,13 +312,19 @@ CLASS lhc_Order IMPLEMENTATION.
      LOOP AT amounts_currencies INTO DATA(single_amount_per_currency).
       order-TotalPrice += single_amount_per_currency-amount.
      ENDLOOP.
+
+     APPEND VALUE #( %tky = order-%tky
+                     TotalPrice = order-TotalPrice
+                     Currency = order-Currency )
+                     TO update.
    ENDLOOP.
 
    MODIFY ENTITIES OF ZI_RAP_ORDER IN LOCAL MODE
     ENTITY Order
-     UPDATE FIELDS ( TotalPrice )
-     WITH CORRESPONDING #( orders ).
+     UPDATE FIELDS ( TotalPrice Currency ) WITH update
+     REPORTED DATA(update_reported).
 
+   REPORTED = CORRESPONDING #( DEEP update_reported ).
   ENDMETHOD.
 
   METHOD setInitialStatus.
@@ -347,14 +348,47 @@ CLASS lhc_Order IMPLEMENTATION.
     reported = CORRESPONDING #( DEEP update_reported ).
   ENDMETHOD.
 
-  METHOD calculatePrice.
-   MODIFY ENTITIES OF ZI_RAP_ORDER IN LOCAL MODE
-    ENTITY Order
-     EXECUTE recalcTotalPrice
-     FROM CORRESPONDING #( keys )
-    REPORTED DATA(execute_reported).
+*  METHOD calculatePrice.
+*   MODIFY ENTITIES OF ZI_RAP_ORDER IN LOCAL MODE
+*    ENTITY Order
+*     EXECUTE recalcTotalPrice
+*     FROM CORRESPONDING #( keys )
+*    REPORTED DATA(execute_reported).
+*
+*   REPORTED = CORRESPONDING #( DEEP execute_reported ).
+*  ENDMETHOD.
 
-   REPORTED = CORRESPONDING #( DEEP execute_reported ).
+  METHOD updateCurrency.
+   DATA update TYPE TABLE FOR UPDATE ZI_RAP_ORDER\\Item.
+
+   READ ENTITIES OF ZI_RAP_ORDER IN LOCAL MODE
+    ENTITY Order
+     ALL FIELDS WITH CORRESPONDING #( keys )
+    RESULT DATA(orders).
+
+   LOOP AT orders INTO DATA(order).
+    DATA(order_currency) = order-Currency.
+
+    READ ENTITIES OF ZI_RAP_ORDER IN LOCAL MODE
+     ENTITY Order BY \_Item
+      FIELDS ( Currency )
+     WITH VALUE #( ( %tky = order-%tky ) )
+    RESULT DATA(items).
+
+    LOOP AT items INTO DATA(item) WHERE currency IS INITIAL.
+     APPEND VALUE #( %tky = item-%tky
+                     Currency = order_currency )
+                     TO update.
+    ENDLOOP.
+
+    MODIFY ENTITIES OF ZI_RAP_ORDER IN LOCAL MODE
+     ENTITY Item
+      UPDATE FIELDS ( Currency ) WITH update
+     REPORTED DATA(update_reported).
+
+    REPORTED = CORRESPONDING #( DEEP update_reported ).
+
+   ENDLOOP.
   ENDMETHOD.
 
 ENDCLASS.

@@ -24,7 +24,7 @@ etag master LastChanged
   determination incrementId on save { create; }
   determination setDate on save { create; }
   determination setInitialStatus on save { create; }
-  determination calculatePrice on modify { field Currency; }
+  determination updateCurrency on modify { field Currency; }
 
   validation validateOrderItems on save { create; }
   validation validateName on save { field Name; create; }
