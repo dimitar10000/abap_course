@@ -66,7 +66,7 @@ etag master LastChanged
   determination setQuantity on save { create; }
   determination calcTotalPrice on modify { field Price; field Quantity; }
 
-  validation validateName on save { field Name; create; }
+  //validation validateName on save { field Name; create; }
   validation validatePrice on save { field Price; create; }
 
   mapping for ZITEM_DKAL

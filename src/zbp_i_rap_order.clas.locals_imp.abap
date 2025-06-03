@@ -41,9 +41,6 @@ CLASS lhc_Order DEFINITION INHERITING FROM cl_abap_behavior_handler.
     METHODS setInitialStatus FOR DETERMINE ON SAVE
       IMPORTING keys FOR Order~setInitialStatus.
 
-*    METHODS calculatePrice FOR DETERMINE ON MODIFY
-*      IMPORTING keys FOR Order~calculatePrice.
-
     METHODS updateCurrency FOR DETERMINE ON MODIFY
       IMPORTING keys FOR Order~updateCurrency.
 
@@ -292,8 +289,6 @@ CLASS lhc_Order IMPLEMENTATION.
      FIELDS ( Currency TotalPrice ) WITH CORRESPONDING #( keys )
     RESULT DATA(orders).
 
-   DELETE orders WHERE CURRENCY IS INITIAL.
-
    LOOP AT orders INTO DATA(order).
     amounts_currencies = VALUE #( ( amount = 0 currency = order-Currency ) ).
 
@@ -303,7 +298,7 @@ CLASS lhc_Order IMPLEMENTATION.
      WITH VALUE #( ( %tky = order-%tky ) )
      RESULT DATA(items).
 
-     LOOP AT items INTO DATA(item) WHERE CURRENCY IS NOT INITIAL.
+     LOOP AT items INTO DATA(item).
       COLLECT VALUE amount_per_currency( amount = item-Price * item-Quantity currency = item-Currency )
        INTO amounts_currencies.
      ENDLOOP.
@@ -347,16 +342,6 @@ CLASS lhc_Order IMPLEMENTATION.
 
     reported = CORRESPONDING #( DEEP update_reported ).
   ENDMETHOD.
-
-*  METHOD calculatePrice.
-*   MODIFY ENTITIES OF ZI_RAP_ORDER IN LOCAL MODE
-*    ENTITY Order
-*     EXECUTE recalcTotalPrice
-*     FROM CORRESPONDING #( keys )
-*    REPORTED DATA(execute_reported).
-*
-*   REPORTED = CORRESPONDING #( DEEP execute_reported ).
-*  ENDMETHOD.
 
   METHOD updateCurrency.
    DATA update TYPE TABLE FOR UPDATE ZI_RAP_ORDER\\Item.

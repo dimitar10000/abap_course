@@ -26,22 +26,22 @@ CLASS ZCL_CALCULATION_COMPLEXITY IMPLEMENTATION.
     WITH CORRESPONDING #( orders )
     RESULT FINAL(items).
 
-   SELECT OrderUuid, COUNT( OrderUuid ) AS num_items
-   FROM @items as i
+   SELECT FROM @items as i
+   FIELDS OrderUuid, COUNT( * ) AS num_items
    GROUP BY OrderUuid
    INTO TABLE @DATA(items_per_order).
 
-   LOOP AT orders INTO DATA(order).
+   LOOP AT orders ASSIGNING FIELD-SYMBOL(<order>).
     READ TABLE items_per_order
-     WITH KEY OrderUuid = order-OrderUuid
+     WITH KEY OrderUuid = <order>-OrderUuid
      INTO DATA(item_counts).
     IF sy-subrc = 0.
      IF item_counts-num_items < 3.
-      order-Complexity = 'Easy'.
+      <order>-Complexity = 'Easy'.
      ELSEIF item_counts-num_items > 2 AND item_counts-num_items < 5.
-      order-Complexity = 'Medium'.
+      <order>-Complexity = 'Medium'.
      ELSEIF item_counts-num_items > 5.
-      order-Complexity = 'Complex'.
+      <order>-Complexity = 'Complex'.
      ENDIF.
     ENDIF.
    ENDLOOP.

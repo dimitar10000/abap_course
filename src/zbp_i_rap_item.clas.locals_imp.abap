@@ -7,8 +7,8 @@ CLASS lhc_Item DEFINITION INHERITING FROM cl_abap_behavior_handler.
     METHODS setCurrency FOR DETERMINE ON SAVE
       IMPORTING keys FOR Item~setCurrency.
 
-    METHODS validateName FOR VALIDATE ON SAVE
-      IMPORTING keys FOR Item~validateName.
+*    METHODS validateName FOR VALIDATE ON SAVE
+*      IMPORTING keys FOR Item~validateName.
 
     METHODS validatePrice FOR VALIDATE ON SAVE
       IMPORTING keys FOR Item~validatePrice.
@@ -73,40 +73,40 @@ CLASS lhc_Item IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD validateName.
-   READ ENTITIES OF ZI_RAP_ORDER IN LOCAL MODE
-    ENTITY Order
-     ALL FIELDS WITH CORRESPONDING #( keys )
-    RESULT DATA(orders).
-
-    LOOP AT orders INTO DATA(order).
-     READ ENTITIES OF ZI_RAP_ORDER IN LOCAL MODE
-      ENTITY Order BY \_Item
-       FIELDS ( Currency )
-       WITH VALUE #( ( %tky = order-%tky ) )
-      RESULT DATA(items).
-
-      LOOP AT items INTO DATA(item).
-       APPEND VALUE #( %tky = order-%tky
-                     %state_area = 'VALIDATE_NAME' )
-      TO reported-order.
-
-       IF item-Name IS INITIAL.
-        APPEND VALUE #( %tky = item-%tky ) to failed-item.
-
-        APPEND VALUE #( %tky = item-%tky
-                     %state_area = 'VALIDATE_NAME'
-                     %msg = NEW zcm_rap_dkal(
-                     severity = if_abap_behv_message=>severity-error
-                     textid = zcm_rap_dkal=>item_name_missing
-                     item_name = item-Name )
-                     %element-Name = if_abap_behv=>mk-on )
-        TO reported-item.
-       ENDIF.
-      ENDLOOP.
-    ENDLOOP.
-
-  ENDMETHOD.
+*  METHOD validateName.
+*   READ ENTITIES OF ZI_RAP_ORDER IN LOCAL MODE
+*    ENTITY Order
+*     ALL FIELDS WITH CORRESPONDING #( keys )
+*    RESULT DATA(orders).
+*
+*    LOOP AT orders INTO DATA(order).
+*     READ ENTITIES OF ZI_RAP_ORDER IN LOCAL MODE
+*      ENTITY Order BY \_Item
+*       FIELDS ( Currency )
+*       WITH VALUE #( ( %tky = order-%tky ) )
+*      RESULT DATA(items).
+*
+*      LOOP AT items INTO DATA(item).
+*       APPEND VALUE #( %tky = order-%tky
+*                     %state_area = 'VALIDATE_NAME' )
+*      TO reported-order.
+*
+*       IF item-Name IS INITIAL.
+*        APPEND VALUE #( %tky = item-%tky ) to failed-item.
+*
+*        APPEND VALUE #( %tky = item-%tky
+*                     %state_area = 'VALIDATE_NAME'
+*                     %msg = NEW zcm_rap_dkal(
+*                     severity = if_abap_behv_message=>severity-error
+*                     textid = zcm_rap_dkal=>item_name_missing
+*                     item_name = item-Name )
+*                     %element-Name = if_abap_behv=>mk-on )
+*        TO reported-item.
+*       ENDIF.
+*      ENDLOOP.
+*    ENDLOOP.
+*
+*  ENDMETHOD.
 
   METHOD validatePrice.
    READ ENTITIES OF ZI_RAP_ORDER IN LOCAL MODE
